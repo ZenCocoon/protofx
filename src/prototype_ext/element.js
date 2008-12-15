@@ -1,5 +1,6 @@
 Element.addMethods({
   fade: function(element, options) {
+    if (!(element = $(element))) return;
     new FX.Element(element)
       .setOptions(options || {})
       .animate({opacity: 0})
@@ -8,6 +9,7 @@ Element.addMethods({
   },
   
   appear: function(element, options) {
+    if (!(element = $(element))) return;
     new FX.Element(element)
       .setOptions(options || {})
       .animate({opacity: 1})
@@ -16,6 +18,7 @@ Element.addMethods({
   },
   
   blindUp: function(element, options) {
+    if (!(element = $(element))) return;
     if (!element.visible()) return;
     
     new FX.Element(element)
@@ -28,6 +31,7 @@ Element.addMethods({
   },
   
   blindDown: function(element, options) {
+    if (!(element = $(element))) return;
     if (element.visible()) return;
     var height = element.getHeight();
     new FX.Element(element)
@@ -37,5 +41,4 @@ Element.addMethods({
       .play();
     return element;
   }
-  
 })
