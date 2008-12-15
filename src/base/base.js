@@ -72,8 +72,12 @@ FX.Base = Class.create((function() {
    *  - count (Number or "unlimited"): number of cycles to run (default 1)
    **/
   function setCycle(type, count) {
-    this.cycle = type == 'none' ? false : {type: type, count: count || 1, current: 0}
+    this.cycle = type == 'none' ? false : {type: type, count: count || 1, current: 0, direction: 1}
     return this;
+  }
+  
+  function getCycle() {
+    return this.cycle ? this.cycle.current : 1
   }
   
   /** 
@@ -122,6 +126,7 @@ FX.Base = Class.create((function() {
    **/
   function reverse() {
     this.fire('reversed');
+    if (this.cycle) this.cycle.direction *= -1;
     this.backward = !this.backward;
     return this;
   }
@@ -151,37 +156,34 @@ FX.Base = Class.create((function() {
     if (this.currentTime > this.getDuration() || this.currentTime < 0) {
       // Force update to last position
       this.currentTime = this.currentTime < 0 ? 0 : this.getDuration();
-      this.updateAnimation(this.currentTime);
+      this.updateAnimation(this.currentTime / this.getDuration());
 
       // Check cycle
-      if (this.cycle && (this.cycle.current < this.cycle.count || this.cycle.count == 'unlimited')) {
+      if (this.cycle) {
         if (this.cycle.type == 'loop') {
-          this.cycle.current++;
+          this.cycle.current += this.cycle.direction;
           this.fire('cycleEnded');
           this.updateAnimation(this.backward ? 1 : 0);
           this.currentTime = this.backward ? this.getDuration() : 0;
         }
         else if (this.cycle.type == 'backAndForth') {
-          this.reverse();
-          if (this.backward) {
-            this.cycle.current++;
+          this.backward = !this.backward;
+          if ((this.backward && this.cycle.direction > 0) || (!this.backward && this.cycle.direction < 0)) {
+            this.cycle.current += this.cycle.direction;
+          }
+          else {
             this.fire('cycleEnded');
           }
         }
+        // Still cycle to run
+        if (this.cycle.count == 'unlimited' || (0 <= this.cycle.current && this.cycle.current < this.cycle.count)) return;
       }
-      else {
-        this.stopAnimation();
-        this.fire('ended');
+      this.stopAnimation();
+      FX.Metronome.unregister(this);
 
-        FX.Metronome.unregister(this);
-      
-        this.currentTime = null;
-        this.playing   = false;
-        if (this.cycle) {
-          this.cycle.current = 0;
-          if (this.cycle.type == 'backAndForth') this.backward = !this.backward;
-        }
-      }
+      this.currentTime = null;
+      this.playing   = false;
+      this.fire('ended');
     }
     else {
       var pos = this.options.transition(this.currentTime / this.getDuration(), this.currentTime, 0, 1, this.getDuration());
@@ -225,6 +227,7 @@ FX.Base = Class.create((function() {
     initialize:      initialize,
     setOptions:      setOptions,
     setCycle:        setCycle,
+    getCycle:        getCycle,
     getDuration:     getDuration,
     play:            play,
     stop:            stop,

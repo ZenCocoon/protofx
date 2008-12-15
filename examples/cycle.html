@@ -28,8 +28,8 @@
       var fx = new FX.Element('block3')
         .setOptions({duration:500, transition: FX.Transition.easeInQuad})
         .animate({opacity: 0})
-        .onCycleEnded( function() { $('console').update(fx.cycle.current); } )
-        .setCycle('backAndForth', 'unlimited');
+        .onCycleEnded( function() { $('console').update(fx.getCycle()); } )
+        .setCycle('backAndForth', 10);
       
       fxControl(fx, true, false);
     });
