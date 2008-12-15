@@ -18,9 +18,7 @@ Element.addMethods({
   },
   
   blindUp: function(element, options) {
-    if (!(element = $(element))) return;
-    if (!element.visible()) return;
-    
+    if (!(element = $(element)) || !element.visible()) return;
     new FX.Element(element)
       .setOptions(options || {})
       .onBeforeStarted(function() {element.originalHeight = element.style.height})
@@ -31,8 +29,7 @@ Element.addMethods({
   },
   
   blindDown: function(element, options) {
-    if (!(element = $(element))) return;
-    if (element.visible()) return;
+    if (!(element = $(element)) || element.visible()) return;
     var height = element.getHeight();
     new FX.Element(element)
       .setOptions(options || {})
