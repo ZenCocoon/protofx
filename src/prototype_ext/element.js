@@ -18,22 +18,25 @@ Element.addMethods({
   },
   
   blindUp: function(element, options) {
-    if (!(element = $(element)) || !element.visible()) return;
-    new FX.Element(element)
+    if (!(element = $(element)) || !element.visible() || element.fx) return;
+    
+    element.fx = new FX.Element(element)
       .setOptions(options || {})
       .onBeforeStarted(function() {element.originalHeight = element.style.height})
-      .onEnded(function() {element.hide(); element.style.height = element.originalHeight; (element.originalHeight)})
+      .onEnded(function() {element.hide(); element.style.height = element.originalHeight; delete element.fx})
       .animate({height: 0})
       .play();
     return element;
   },
   
   blindDown: function(element, options) {
-    if (!(element = $(element)) || element.visible()) return;
+    if (!(element = $(element)) || element.visible() || element.fx) return;
     var height = element.getHeight();
-    new FX.Element(element)
+
+    element.fx = new FX.Element(element)
       .setOptions(options || {})
       .onBeforeStarted(function() {element.show(); element.style.height = '0px'})
+      .onEnded(function() {delete element.fx})
       .animate({height: height + 'px'})
       .play();
     return element;
@@ -41,13 +44,17 @@ Element.addMethods({
   
   highlight: function(element, options) {
     if (!(element = $(element)) || !element.visible()) return;
-    var options = options || {};
+    options = options || {};
+
+    if (element.fx) element.fx.stop().reverse().rewind();
+
     var highlightColor = options.highlightColor || "#ffff99";
     var originalColor = element.getStyle('background-color');
-    // TODO: Should prevent from highlighting an under highling element
-    new FX.Element(element.setStyle({backgroundColor: highlightColor}))
+        
+    element.fx = new FX.Element(element.setStyle({backgroundColor: highlightColor}))
       .setOptions(options)
       .animate({backgroundColor: originalColor})
+      .onEnded(function() {delete element.fx})
       .play();
     return element;
   }
