@@ -37,5 +37,18 @@ Element.addMethods({
       .animate({height: height + 'px'})
       .play();
     return element;
+  },
+  
+  highlight: function(element, options) {
+    if (!(element = $(element)) || !element.visible()) return;
+    var options = options || {};
+    var highlightColor = options.highlightColor || "#ffff99";
+    var originalColor = element.getStyle('background-color');
+    // TODO: Should prevent from highlighting an under highling element
+    new FX.Element(element.setStyle({backgroundColor: highlightColor}))
+      .setOptions(options)
+      .animate({backgroundColor: originalColor})
+      .play();
+    return element;
   }
-})
+});
