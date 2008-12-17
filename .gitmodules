@@ -1,3 +1,6 @@
 [submodule "lib/pdoc"]
 	path = lib/pdoc
 	url = git://github.com/tobie/pdoc.git
+[submodule "vendor/unittest_js"]
+  path = vendor/unittest_js
+  url = git://github.com/tobie/unittest_js.git
