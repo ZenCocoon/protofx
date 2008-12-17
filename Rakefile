@@ -164,15 +164,15 @@ namespace :test do
     # UnittestJS currently relies on Prototype. We need to include a current
     # version of Prototype, not the one built-in to the library. Hence the
     # monkey-pacthing below.
-    class UnittestJS::Builder::TestBuilder
-      def lib_files
-        lib_assets = @options.output_unittest_assets_dir.name
-        [
-          to_script_tag("#{@options.output_assets_dir.name}/prototype.js"),
-          to_script_tag("#{lib_assets}/unittest.js"),
-          to_link_tag("#{lib_assets}/unittest.css")
-        ].join("\n")
-      end
-    end
+    # class UnittestJS::Builder::TestBuilder
+    #   def lib_files
+    #     lib_assets = @options.output_unittest_assets_dir.name
+    #     [
+    #       to_script_tag("#{@options.output_assets_dir.name}/prototype.js"),
+    #       to_script_tag("#{lib_assets}/unittest.js"),
+    #       to_link_tag("#{lib_assets}/unittest.css")
+    #     ].join("\n")
+    #   end
+    # end
   end
 end
