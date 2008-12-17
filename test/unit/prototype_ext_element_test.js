@@ -7,7 +7,7 @@ new Test.Unit.Runner({
       this.assertEqual(0, $('div').getOpacity());
     });
     
-    $('div').fade({duration: 1000});
+    $('div').show().fade({duration: 1000});
     this.wait(550, function(){
       this.assertNotEqual(0, $('div').getOpacity());
       this.wait(500, function(){
@@ -26,7 +26,7 @@ new Test.Unit.Runner({
       this.assertEqual(1, $('div').getOpacity());
     });
     
-    $('div').appear({duration: 1000});
+    $('div').hide().appear({duration: 1000});
     this.wait(550, function(){
       this.assertNotEqual(1, $('div').getOpacity());
       this.wait(500, function(){
