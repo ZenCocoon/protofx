@@ -18,7 +18,8 @@ Element.addMethods({
   },
   
   blindUp: function(element, options) {
-    if (!(element = $(element)) || !element.visible() || element.fx) return;
+    if (!(element = $(element))) return;
+    if (!element.visible() || element.fx) return element;
     
     element.fx = new FX.Element(element)
       .setOptions(options || {})
@@ -30,7 +31,8 @@ Element.addMethods({
   },
   
   blindDown: function(element, options) {
-    if (!(element = $(element)) || element.visible() || element.fx) return;
+    if (!(element = $(element))) return;
+    if (element.visible() || element.fx) return element;
     var height = element.getHeight();
 
     element.fx = new FX.Element(element)
@@ -43,7 +45,8 @@ Element.addMethods({
   },
   
   highlight: function(element, options) {
-    if (!(element = $(element)) || !element.visible()) return;
+    if (!(element = $(element))) return;
+    if (!element.visible()) return element;
     options = options || {};
 
     if (element.fx) element.fx.stop().reverse().rewind();
