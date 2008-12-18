@@ -66,29 +66,29 @@ Element.addMethods({
   shake: function(element, options){
     if (!(element = $(element))) return;
     if (!element.visible()) return element;
-    options = options || {};
+    options = Object.extend({duration: 50}, options || {});
 
     if (element.fx) element.fx.stop().reverse().rewind();
-    
+
     var distance = options.distance || 20;
     
     var move_right = new FX.Element(element)
+      .setOptions(options)
       // TODO: Loop should make the back and forth even if only one loop
       .setCycle('backAndForth', 1)
-      // TODO: Should support +=XXXpx, suffix is not supported now
+      // TODO: Should support +=XXXpx, suffix doesn't seem to be supported yet
       .animate({left: '+='+distance});
     var move_left = new FX.Element(element)
+      .setOptions(options)
       // TODO: Loop should make the back and forth even if only one loop
       .setCycle('backAndForth', 1)
-      // TODO: Should support +=XXXpx, suffix is not supported now
+      // TODO: Should support +=XXXpx, suffix doesn't seem to be supported yet
       .animate({left: '-='+distance});
+    element.makePositioned();
     element.fx = new FX.Score(element)
-      // TODO: Makes sure duration acts properly
-      .setOptions(options)
+      // TODO: Would be nice to set duration as the global time spent in the queue
       // TODO: Doesn't seem to loop
       .setCycle('loop', 2)
-      // TODO: Doesn't seems to be trigerred before it any actions starts
-      .onBeforeStarted(function() {element.makePositioned();})
       .onEnded(function() {element.undoPositioned(); delete element.fx;})
       .add(move_right)
       .add(move_left, {position: 'last'})
