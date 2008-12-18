@@ -187,7 +187,7 @@ FX.Base = Class.create((function() {
       FX.Metronome.unregister(this);
 
       this.currentTime = null;
-      this.playing   = false;
+      this.playing = false;
       this.fire('ended');
     }
     else {
