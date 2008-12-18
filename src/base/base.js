@@ -45,7 +45,7 @@ FX.Base = Class.create((function() {
    *  FX.Base#setOptions(options) -> FX.Base
    **/
   function setOptions(options) {
-    Object.extend(this.options, options || {});  
+    Object.extend(this.options, options || {});
     return this; 
   }
   
