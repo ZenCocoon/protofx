@@ -226,7 +226,7 @@ FX.Base = Class.create((function() {
   
   function fire(eventName) {
     var callback;
-    if (callback = this.callbacks['on'+ eventName.capitalize()]) callback();
+    if (callback = this.callbacks['on'+ eventName.capitalize()]) callback(this);
     this.options.eventNotifier.fire('fx:' + eventName, {fx: this, data: this.memoData});
   }
 
