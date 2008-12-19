@@ -164,7 +164,7 @@ FX.Base = Class.create((function() {
   function metronomeUpdate(delta) {
     // Update current time
     this.currentTime += this.backward ? -delta : delta;
-        
+
     // Unregister from FX.Metronome if time is out of range
     if (this.currentTime > this.getDuration() || this.currentTime < 0) {
       // Force update to last position
@@ -181,20 +181,11 @@ FX.Base = Class.create((function() {
         }
         else if (this.cycle.type == 'backAndForth') {
           this.backward = !this.backward;
-          if (this.cycle.back) {
-            if ((!this.backward && this.cycle.direction > 0) || (this.backward && this.cycle.direction < 0)) {
-              this.cycle.current += this.cycle.direction;
-            }
-            else {
-              this.fire('cycleEnded');
-            }
-          } else {
-            if ((this.backward && this.cycle.direction > 0) || (!this.backward && this.cycle.direction < 0)) {
-              this.cycle.current += this.cycle.direction;
-            }
-            else {
-              this.fire('cycleEnded');
-            }
+          if ((this.backward !== this.cycle.back && this.cycle.direction > 0) || (this.backward === this.cycle.back && this.cycle.direction < 0)) {
+            this.cycle.current += this.cycle.direction;
+          }
+          else {
+            this.fire('cycleEnded');
           }
         }
         // Still cycle to run
