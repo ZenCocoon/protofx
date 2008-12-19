@@ -108,8 +108,7 @@ Element.addMethods({
     
     element.fx_pulsate = new FX.Element(element)
       .setOptions(options)
-      // TODO: Loop should make the back after the loops
-      .setCycle('backAndForth', pulses)
+      .setCycle('backAndForth', pulses, true)
       .onEnded(function() {delete element.fx_pulsate;})
       .animate({opacity: 0})
       .play();
