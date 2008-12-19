@@ -94,5 +94,25 @@ Element.addMethods({
       .add(move_left, {position: 'last'})
       .play();
     return element;
+  },
+  
+  pulsate: function(element, options) {
+    if (!(element = $(element))) return;
+    if (!element.visible()) return element;
+    options = Object.extend({duration: 2000}, options || {});
+
+    if (element.fx_pulsate) element.fx_pulsate.isBackward() ? element.fx_pulsate.stop().reverse().rewind() : element.fx_pulsate.stop().rewind();
+
+    var pulses = options.pulses || 5;
+    options.duration = options.duration / (pulses * 2);
+    
+    element.fx_pulsate = new FX.Element(element)
+      .setOptions(options)
+      // TODO: Loop should make the back after the loops
+      .setCycle('backAndForth', pulses)
+      .onEnded(function() {delete element.fx_pulsate;})
+      .animate({opacity: 0})
+      .play();
+    return element;
   }
 });
