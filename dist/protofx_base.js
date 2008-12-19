@@ -46,7 +46,7 @@ FX.Base = Class.create((function() {
    *  FX.Base#setOptions(options) -> FX.Base
    **/
   function setOptions(options) {
-    Object.extend(this.options, options || {});  
+    Object.extend(this.options, options || {});
     return this; 
   }
   
@@ -65,15 +65,23 @@ FX.Base = Class.create((function() {
   }
   
   /** 
+   *  FX.Base#isBackward() -> true/false
+   **/
+  function isBackward() {
+    return this.backward;
+  }
+  
+  /** 
    *  FX.Base#setCycle(type, count) -> FX.Base
    *  - type (String): 
    *    - 'loop' restarts from begin when effect is done
    *    - 'backAndForth' starts in reverse mode when effect is done
    *    - 'none' no cycles
    *  - count (Number or "unlimited"): number of cycles to run (default 1)
+   *  - back (true/false): if type is "backAndForth" should it come back to original states ? (default true if 1 cycle otherwise false)
    **/
-  function setCycle(type, count) {
-    this.cycle = type == 'none' ? false : {type: type, count: count || 1, current: 0, direction: 1}
+  function setCycle(type, count, back) {
+    this.cycle = type == 'none' ? false : {type: type, count: count || 1, back: type == 'backAndForth' ? back || (count == 1 ? true : false) : false, current: 0, direction: 1}
     return this;
   }
   
@@ -157,7 +165,7 @@ FX.Base = Class.create((function() {
   function metronomeUpdate(delta) {
     // Update current time
     this.currentTime += this.backward ? -delta : delta;
-        
+
     // Unregister from FX.Metronome if time is out of range
     if (this.currentTime > this.getDuration() || this.currentTime < 0) {
       // Force update to last position
@@ -174,7 +182,7 @@ FX.Base = Class.create((function() {
         }
         else if (this.cycle.type == 'backAndForth') {
           this.backward = !this.backward;
-          if ((this.backward && this.cycle.direction > 0) || (!this.backward && this.cycle.direction < 0)) {
+          if ((this.backward !== this.cycle.back && this.cycle.direction > 0) || (this.backward === this.cycle.back && this.cycle.direction < 0)) {
             this.cycle.current += this.cycle.direction;
           }
           else {
@@ -188,7 +196,7 @@ FX.Base = Class.create((function() {
       FX.Metronome.unregister(this);
 
       this.currentTime = null;
-      this.playing   = false;
+      this.playing = false;
       this.fire('ended');
     }
     else {
@@ -219,7 +227,7 @@ FX.Base = Class.create((function() {
   
   function fire(eventName) {
     var callback;
-    if (callback = this.callbacks['on'+ eventName.capitalize()]) callback();
+    if (callback = this.callbacks['on'+ eventName.capitalize()]) callback(this);
     this.options.eventNotifier.fire('fx:' + eventName, {fx: this, data: this.memoData});
   }
 
@@ -240,6 +248,7 @@ FX.Base = Class.create((function() {
     reverse:         reverse,
     rewind:          rewind,
     isPlaying:       isPlaying,
+    isBackward:      isBackward, 
     metronomeUpdate: metronomeUpdate,
     startAnimation:  Prototype.emptyFunction,
     stopAnimation:   Prototype.emptyFunction,
@@ -596,43 +605,97 @@ Element.addMethods({
   },
   
   blindUp: function(element, options) {
-    if (!(element = $(element)) || !element.visible() || element.fx) return;
+    if (!(element = $(element))) return;
+    if (!element.visible() || element.fx_blindUp) return element;
     
-    element.fx = new FX.Element(element)
+    element.fx_blindUp = new FX.Element(element)
       .setOptions(options || {})
       .onBeforeStarted(function() {element.originalHeight = element.style.height})
-      .onEnded(function() {element.hide(); element.style.height = element.originalHeight; delete element.fx})
+      .onEnded(function() {element.hide(); element.style.height = element.originalHeight; delete element.fx_blindUp;})
       .animate({height: 0})
       .play();
     return element;
   },
   
   blindDown: function(element, options) {
-    if (!(element = $(element)) || element.visible() || element.fx) return;
+    if (!(element = $(element))) return;
+    if (element.visible() || element.fx_blindDown) return element;
     var height = element.getHeight();
 
-    element.fx = new FX.Element(element)
+    element.fx_blindDown = new FX.Element(element)
       .setOptions(options || {})
-      .onBeforeStarted(function() {element.show(); element.style.height = '0px'})
-      .onEnded(function() {delete element.fx})
+      .onBeforeStarted(function() {element.show(); element.style.height = '0px';})
+      .onEnded(function() {delete element.fx_blindDown})
       .animate({height: height + 'px'})
       .play();
     return element;
   },
   
   highlight: function(element, options) {
-    if (!(element = $(element)) || !element.visible()) return;
+    if (!(element = $(element))) return;
+    if (!element.visible()) return element;
     options = options || {};
 
-    if (element.fx) element.fx.stop().reverse().rewind();
+    if (element.fx_highlight) element.fx_highlight.stop().reverse().rewind();
 
     var highlightColor = options.highlightColor || "#ffff99";
     var originalColor = element.getStyle('background-color');
         
-    element.fx = new FX.Element(element.setStyle({backgroundColor: highlightColor}))
+    element.fx_highlight = new FX.Element(element)
       .setOptions(options)
       .animate({backgroundColor: originalColor})
-      .onEnded(function() {delete element.fx})
+      .onBeforeStarted(function() {element.setStyle({backgroundColor: highlightColor});})
+      .onEnded(function() {delete element.fx_highlight})
+      .play();
+    return element;
+  },
+  
+  shake: function(element, options){
+    if (!(element = $(element))) return;
+    if (!element.visible()) return element;
+    options = Object.extend({duration: 50}, options || {});
+
+    if (element.fx) element.fx_shake.stop().reverse().rewind();
+
+    var distance = options.distance || 20;
+    
+    var move_right = new FX.Element(element)
+      .setOptions(options)
+      .setCycle('backAndForth', 1)
+      // TODO: Should support +=XXXpx, suffix doesn't seem to be supported yet
+      .animate({left: '+='+distance});
+      
+    var move_left = new FX.Element(element)
+      .setOptions(options)
+      .setCycle('backAndForth', 1)
+      // TODO: Should support +=XXXpx, suffix doesn't seem to be supported yet
+      .animate({left: '-='+distance});
+    element.makePositioned();
+    element.fx_shake = new FX.Score(element)
+    //   // TODO: Doesn't seem to loop
+    //   // .setCycle('loop', 2)
+      .onEnded(function() {element.undoPositioned(); delete element.fx_shake;})
+      .add(move_right)
+    //   // .add(move_left, {position: 'last'})
+      .play();
+    return element;
+  },
+  
+  pulsate: function(element, options) {
+    if (!(element = $(element))) return;
+    if (!element.visible()) return element;
+    options = Object.extend({duration: 2000}, options || {});
+
+    if (element.fx_pulsate) element.fx_pulsate.isBackward() ? element.fx_pulsate.stop().reverse().rewind() : element.fx_pulsate.stop().rewind();
+
+    var pulses = options.pulses || 5;
+    options.duration = options.duration / (pulses * 2);
+    
+    element.fx_pulsate = new FX.Element(element)
+      .setOptions(options)
+      .setCycle('backAndForth', pulses, true)
+      .onEnded(function() {delete element.fx_pulsate;})
+      .animate({opacity: 0})
       .play();
     return element;
   }
