@@ -1,4 +1,4 @@
-// t: current time, b: begInnIng value, c: change In value, d: duration
+// t: current time, b: beginning value, c: change in value, d: duration
 Object.extend(FX.Transition, {
 	linear: function(x, t, b, c, d) {
 		return c*t/d + b;
