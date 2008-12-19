@@ -77,10 +77,13 @@ FX.Base = Class.create((function() {
    *    - 'backAndForth' starts in reverse mode when effect is done
    *    - 'none' no cycles
    *  - count (Number or "unlimited"): number of cycles to run (default 1)
-   *  - back (true/false): if type is "backAndForth" should it come back to original states ? (default true if 1 cycle otherwise false)
+   *  - back (true/false): should it come back to original states after each loop ? (default true if type is backAndForth else is false)
    **/
   function setCycle(type, count, back) {
-    this.cycle = type == 'none' ? false : {type: type, count: count || 1, back: type == 'backAndForth' ? back || (count == 1 ? true : false) : false, current: 0, direction: 1}
+    back = type == 'backAndForth' ?
+      ((back === false || back == 'false') ? false : true) :
+      ((back === true  || back == 'true' ) ? true  : false);
+    this.cycle = type == 'none' ? false : {type: type, count: count || 1, back: back, current: 0, direction: 1};
     return this;
   }
   
@@ -181,10 +184,8 @@ FX.Base = Class.create((function() {
         }
         else if (this.cycle.type == 'backAndForth') {
           this.backward = !this.backward;
-          if ((this.backward !== this.cycle.back && this.cycle.direction > 0) || (this.backward === this.cycle.back && this.cycle.direction < 0)) {
+          if ((this.backward != this.cycle.back && this.cycle.direction > 0) || (this.backward == this.cycle.back && this.cycle.direction < 0)) {
             this.cycle.current += this.cycle.direction;
-          }
-          else {
             this.fire('cycleEnded');
           }
         }
