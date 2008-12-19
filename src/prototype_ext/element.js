@@ -85,11 +85,13 @@ Element.addMethods({
       .animate({left: '-='+distance});
     element.makePositioned();
     element.fx_shake = new FX.Score(element)
-    //   // TODO: Doesn't seem to loop
-    //   // .setCycle('loop', 2)
+      // TODO: Doesn't loop
+      .setCycle('loop', 2)
       .onEnded(function() {element.undoPositioned(); delete element.fx_shake;})
+      // TODO: Does makes backAndForth cycle as expected
       .add(move_right)
-    //   // .add(move_left, {position: 'last'})
+      // TODO: Does makes backAndForth cycle as expected
+      .add(move_left, {position: 'last'})
       .play();
     return element;
   },
