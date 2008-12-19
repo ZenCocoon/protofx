@@ -64,6 +64,13 @@ FX.Base = Class.create((function() {
   }
   
   /** 
+   *  FX.Base#isBackward() -> true/false
+   **/
+  function isBackward() {
+    return this.backward;
+  }
+  
+  /** 
    *  FX.Base#setCycle(type, count) -> FX.Base
    *  - type (String): 
    *    - 'loop' restarts from begin when effect is done
@@ -239,6 +246,7 @@ FX.Base = Class.create((function() {
     reverse:         reverse,
     rewind:          rewind,
     isPlaying:       isPlaying,
+    isBackward:      isBackward, 
     metronomeUpdate: metronomeUpdate,
     startAnimation:  Prototype.emptyFunction,
     stopAnimation:   Prototype.emptyFunction,
