@@ -19,12 +19,12 @@ Element.addMethods({
   
   blindUp: function(element, options) {
     if (!(element = $(element))) return;
-    if (!element.visible() || element.fx) return element;
+    if (!element.visible() || element.fx_blindUp) return element;
     
-    element.fx = new FX.Element(element)
+    element.fx_blindUp = new FX.Element(element)
       .setOptions(options || {})
       .onBeforeStarted(function() {element.originalHeight = element.style.height})
-      .onEnded(function() {element.hide(); element.style.height = element.originalHeight; delete element.fx;})
+      .onEnded(function() {element.hide(); element.style.height = element.originalHeight; delete element.fx_blindUp;})
       .animate({height: 0})
       .play();
     return element;
@@ -32,13 +32,13 @@ Element.addMethods({
   
   blindDown: function(element, options) {
     if (!(element = $(element))) return;
-    if (element.visible() || element.fx) return element;
+    if (element.visible() || element.fx_blindDown) return element;
     var height = element.getHeight();
 
-    element.fx = new FX.Element(element)
+    element.fx_blindDown = new FX.Element(element)
       .setOptions(options || {})
       .onBeforeStarted(function() {element.show(); element.style.height = '0px';})
-      .onEnded(function() {delete element.fx})
+      .onEnded(function() {delete element.fx_blindDown})
       .animate({height: height + 'px'})
       .play();
     return element;
@@ -49,16 +49,16 @@ Element.addMethods({
     if (!element.visible()) return element;
     options = options || {};
 
-    if (element.fx) element.fx.stop().reverse().rewind();
+    if (element.fx_highlight) element.fx_highlight.stop().reverse().rewind();
 
     var highlightColor = options.highlightColor || "#ffff99";
     var originalColor = element.getStyle('background-color');
         
-    element.fx = new FX.Element(element)
+    element.fx_highlight = new FX.Element(element)
       .setOptions(options)
       .animate({backgroundColor: originalColor})
       .onBeforeStarted(function() {element.setStyle({backgroundColor: highlightColor});})
-      .onEnded(function() {delete element.fx})
+      .onEnded(function() {delete element.fx_highlight})
       .play();
     return element;
   },
