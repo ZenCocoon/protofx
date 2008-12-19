@@ -1,47 +1,63 @@
 new Test.Unit.Runner({
+  setup: function(){
+    // TODO: Would be good to load fixture instead
+    $('sandbox').insert('<div id="div"> </div>');
+  },
+  
+  teardown: function(){
+    $('div').remove();
+  },
+  
   testEvents: function(){
-    var width = $('div').setStyle({backgroundColor: 'red', height: '10px', width: '100px'}).getWidth();
+    var width = $('div').setStyle({width: '100px'}).getWidth();
     var nb_loop = 2;
 
     var Tests = {
-      beforeStarted: function(test_runner) {
-        test_runner.assertEqual(width, $('div').getWidth(), "beforeStarted event shoule be called before any modifiction");
+      beforeStarted: function(fx, test_runner) {
+        test_runner = test_runner || this;
+        test_runner.assertEqual(width, $('div').getWidth(), "beforeStarted event should be called before any modifiction");
       },
-      started: function(test_runner) {
-        // test_runner.assertEqual(true, fx.playing(), "started event should be called once started");
+      started: function(fx, test_runner) {
+        test_runner = test_runner || this;
+        test_runner.assertEqual(true, fx.isPlaying(), "started event should be called once started");
       },
-      cycleEnded: function(test_runner) {
-        // test_runner.assertEqual(width + (100 * fx.getCycle()), $('div').getWidth(), "cycleEnded should be called once every cycle is done");
+      cycleEnded: function(fx, test_runner) {
+        test_runner = test_runner || this;
+        test_runner.assertEqual(width + (100 * fx.getCycle()), $('div').getWidth(), "cycleEnded should be called once every cycle is done");
       },
-      ended: function(test_runner) {
+      ended: function(fx, test_runner) {
+        test_runner = test_runner || this;
         test_runner.assertEqual(width + (100 * nb_loop), $('div').getWidth(), "ended event should be called once all the modifications has been done");
       }
     };
 
     document.observe('fx:beforeStarted', function(event) {
-      Tests.beforeStarted(this);
+      Tests.beforeStarted(event.memo.fx, this);
     }.bind(this));
     
     document.observe('fx:started', function(event) {
-      Tests.started(this);
+      Tests.started(event.memo.fx, this);
     }.bind(this));
     
     document.observe('fx:cycleEnded', function(event) {
-      Tests.cycleEnded(this);
+      Tests.cycleEnded(event.memo.fx, this);
     }.bind(this));
     
     document.observe('fx:ended', function(event) {
-      Tests.ended(this);
+      Tests.ended(event.memo.fx, this);
     }.bind(this));
     
-    var fx = new FX.Element('div')
+    new FX.Element('div')
       .setOptions({duration: 500})
       .animate({width: '+=100'})
       .setCycle('loop', nb_loop)
-      .onBeforeStarted(Tests.beforeStarted(this))
-      .onStarted(Tests.started(this))
-      .onCycleEnded(Tests.cycleEnded(this))
-      .onEnded(Tests.ended(this))
+      .onBeforeStarted(Tests.beforeStarted.bind(this))
+      .onStarted(Tests.started.bind(this))
+      .onCycleEnded(Tests.cycleEnded.bind(this))
+      .onEnded(Tests.ended.bind(this))
       .play();
+
+    // Keep waiting the end of the animation + tiny extra to don't stop testing before animation has been done
+    this.wait(1050, Prototype.emptyFunction);
   }
 });
