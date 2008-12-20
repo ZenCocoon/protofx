@@ -39,7 +39,7 @@ FX.Element = Class.create(FX.Base, (function() {
     }, this);
     this.element.setStyle(style);
   }
-    
+  
   // PRIVATE FUNCTIONS
   // Parse all attributes and create FX.attribute for each
   function prepareAttributes(attributes, element) {

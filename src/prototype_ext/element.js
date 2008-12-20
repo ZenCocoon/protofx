@@ -77,7 +77,6 @@ Element.addMethods({
       .setCycle('backAndForth', 1)
       // TODO: Should support +=XXXpx, suffix doesn't seem to be supported yet
       .animate({left: '+='+distance});
-      
     var move_left = new FX.Element(element)
       .setOptions(options)
       .setCycle('backAndForth', 1)
