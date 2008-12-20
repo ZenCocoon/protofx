@@ -47,7 +47,10 @@
 
         container = $(container);
 
-        var [type, count, back] = container.id.split('-');
+        var array = container.id.split('-');
+        var type = array[0];
+        var count = array[1];
+        var back = array[2];
         var type = type == 'backandforth' ? 'backAndForth' : 'loop';
 
         container.down('div.demo').update(type + '<br />' + count + ' times<br />Back : ' + back)
