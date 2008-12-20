@@ -39,8 +39,7 @@
   }
 
   /** 
-   *  FX.Attribute#isColor() -> true/false
-   *  Returns true if this attribute represents a Color (rgb value), else returns false
+   *  FX.Attribute#reset()
    **/
   function reset(from, backward) {
     if (from && this.relative)
