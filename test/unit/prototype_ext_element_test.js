@@ -58,16 +58,17 @@ new Test.Unit.Runner({
     
     this.assertEqual(200, element.getHeight());
     element.blindUp();
-    // TODO: Why to restore to original height and keep it hidden ? Why not keep it to height: 0 ?
     this.wait(550, function(){
-      this.assertEqual(0, element.getHeight());
+      this.assertEqual(200, element.getHeight(), 'Should end with initial height');
+      this.assertNotVisible(element, 'Should end hidden');
     
-      element.setStyle({height: '200px'}).blindUp({duration: 1000});
+      element.show().blindUp({duration: 1000});
       this.wait(550, function(){
         this.assertNotEqual(200, element.getHeight());
         this.assertNotEqual(0, element.getHeight());
         this.wait(500, function(){
-          this.assertEqual(0, element.getHeight());
+          this.assertEqual(200, element.getHeight(), 'Should end with initial height');
+          this.assertNotVisible(element, 'Should end hidden');
         });
       });
     });
