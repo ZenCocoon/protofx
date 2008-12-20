@@ -24,12 +24,12 @@
     document.observe('dom:loaded', function() {
       buildCycleDemo('backandforth-3-true');
       buildCycleDemo('backandforth-3-false');
-      buildCycleDemo('loop-3-true');
-      buildCycleDemo('loop-3-false');
+      buildCycleDemo('loop-3-true', {transition: FX.Transition.easeOutBounce});
+      buildCycleDemo('loop-3-false', {transition: FX.Transition.easeOutBounce});
       buildCycleDemo('backandforth-unlimited-true');
       
       // Demo builder
-      function buildCycleDemo(container) {
+      function buildCycleDemo(container, options) {
         var demo =   ['<div class="demo_container" id="CONTAINER_ID">',
                       '<div class="demo" style="height: 120px;">',
                       '</div>',
@@ -55,7 +55,7 @@
         container.insert({top: player + counter});
 
         var fx = new FX.Element(container.down('div.demo'))
-          .setOptions({duration:1000, transition: FX.Transition.easeInQuad})
+          .setOptions(Object.extend({duration:1000, transition: FX.Transition.easeInQuad}, options || {}))
           .animate({height: '+=100'})
           .setCycle(type, count, back)
           .onCycleEnded(function(fx) {container.down('span.console').update(fx.getCycle());});
