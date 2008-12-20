@@ -1,14 +1,17 @@
 new Test.Unit.Runner({
-  setup: function(){
+  setup: function() {
     // TODO: Would be good to load fixture instead
     $('sandbox').insert('<div id="div"> </div>');
+    this.duration = 250;
+    // In case of failures first try to increase this extra waiting time
+    this.extra_wait = 100;
   },
   
-  teardown: function(){
+  teardown: function() {
     $('div').remove();
   },
   
-  testEvents: function(){
+  testEvents: function() {
     var width = $('div').setStyle({width: '100px'}).getWidth();
     var nb_loop = 2;
 
@@ -48,7 +51,7 @@ new Test.Unit.Runner({
     }.bind(this));
     
     new FX.Element('div')
-      .setOptions({duration: 500})
+      .setOptions({duration: this.duration})
       .animate({width: '+=100'})
       .setCycle('loop', nb_loop)
       .onBeforeStarted(Tests.beforeStarted.bind(this))
@@ -58,6 +61,68 @@ new Test.Unit.Runner({
       .play();
 
     // Keep waiting the end of the animation + tiny extra to don't stop testing before animation has been done
-    this.wait(1050, Prototype.emptyFunction);
+    this.wait(this.duration * nb_loop + this.extra_wait, Prototype.emptyFunction);
+  },
+  
+  testBackAndForthCycles: function() {
+    var height = $('div').setStyle({height: '100px'}).getHeight();
+    var fx = new FX.Element('div')
+      .setOptions({duration: this.duration})
+      .animate({height: '+=100'})
+      .setCycle('backAndForth', 2)
+      .onEnded(function(fx) {
+        this.assertEqual(height, $('div').getHeight(), "Style should be back to original at the end");
+      }.bind(this))
+      .play();
+      
+    // Keep waiting the end of the animation + tiny extra to don't stop testing before animation has been done
+    this.wait(this.duration * 4 + this.extra_duration, function() {
+      this.teardown();
+      this.setup();
+          
+      var height = $('div').setStyle({height: '100px'}).getHeight();
+      var fx = new FX.Element('div')
+        .setOptions({duration: this.duration})
+        .animate({height: '+=100'})
+        .setCycle('backAndForth', 2, false)
+        .onEnded(function(fx) {
+          this.assertEqual(height + 100, $('div').getHeight(), "Style should ends with one update done.");
+        }.bind(this))
+        .play();
+      
+      // Keep waiting the end of the animation + tiny extra to don't stop testing before animation has been done
+      this.wait(this.duration * 4 + this.extra_wait, Prototype.emptyFunction);
+    });
+  },
+  
+  testLoopCycles: function() {
+    var height = $('div').setStyle({height: '100px'}).getHeight();
+    var fx = new FX.Element('div')
+      .setOptions({duration: this.duration})
+      .animate({height: '+=100'})
+      .setCycle('loop', 2)
+      .onEnded(function(fx) {
+        this.assertEqual(height, $('div').getHeight(), "Style should be back to original at the end");
+      }.bind(this))
+      .play();
+      
+    // Keep waiting the end of the animation + tiny extra to don't stop testing before animation has been done
+    this.wait(this.duration * 2 + this.extra_duration, function() {
+      this.teardown();
+      this.setup();
+          
+      var height = $('div').setStyle({height: '100px'}).getHeight();
+      var fx = new FX.Element('div')
+        .setOptions({duration: this.duration})
+        .animate({height: '+=100'})
+        .setCycle('loop', 2, false)
+        .onEnded(function(fx) {
+          this.assertEqual(height + 200, $('div').getHeight(), "Style should ends with X loops update done.");
+        }.bind(this))
+        .play();
+      
+      // Keep waiting the end of the animation + tiny extra to don't stop testing before animation has been done
+      this.wait(this.duration * 2 + this.extra_wait, Prototype.emptyFunction);
+    });
   }
 });
