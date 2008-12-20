@@ -19,8 +19,6 @@ function generateLoremIpsum(nb) {
   
 }
 
-
-
 function fxControl(fx, includePlayer, includeOptions) {
   var player = ["<button id='play'>    Play    </button>",
                 "<button id='stop'>    Stop    </button>",

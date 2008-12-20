@@ -20,20 +20,64 @@
   </head>
 
   <body>
-    <div id='block3'> Bla Bla Bla </div>
-    <p>Cycle count: <span id="console">0</span></p>
-  
     <script type="text/javascript">
     document.observe('dom:loaded', function() {
-      var fx = new FX.Element('block3')
-        .setOptions({duration:500, transition: FX.Transition.easeInQuad})
-        .animate({opacity: 0})
-        .onCycleEnded( function() { $('console').update(fx.getCycle()); } )
-        .setCycle('backAndForth', 10);
+      buildCycleDemo('backandforth-3-true');
+      buildCycleDemo('backandforth-3-false');
+      buildCycleDemo('loop-3-true');
+      buildCycleDemo('loop-3-false');
+      buildCycleDemo('backandforth-unlimited-true');
       
-      fxControl(fx, true, false);
+      // Demo builder
+      function buildCycleDemo(container) {
+        var demo =   ['<div class="demo_container" id="CONTAINER_ID">',
+                      '<div class="demo" style="height: 120px;">',
+                      '</div>',
+                      '</div>'].join('\n');
+        var player = ['<div class="player">',
+                      '<a href="#" class="play">Play</a>',
+                      '<a href="#" class="stop">Stop</a>',
+                      '<a href="#" class="rewind">Rewind</a>',
+                      '<label class="reverse"><input type="checkbox" />Reverse</label>',
+                      '</div>'].join('\n');
+        var counter = '<div class="counter">Cycle count : <span class="console">0</span></div>';
+
+
+        $(document.body).insert(demo.sub('CONTAINER_ID', container));
+
+        container = $(container);
+
+        var [type, count, back] = container.id.split('-');
+        var type = type == 'backandforth' ? 'backAndForth' : 'loop';
+
+        container.down('div.demo').update(type + '<br />' + count + ' times<br />Back : ' + back)
+
+        container.insert({top: player + counter});
+
+        var fx = new FX.Element(container.down('div.demo'))
+          .setOptions({duration:1000, transition: FX.Transition.easeInQuad})
+          .animate({height: '+=100'})
+          .setCycle(type, count, back)
+          .onCycleEnded(function(fx) {container.down('span.console').update(fx.getCycle());});
+
+        container.down('a.play').observe('click', function(event) {
+          event.stop();
+          fx.play();
+        });
+        container.down('a.stop').observe('click', function(event) {
+          event.stop();
+          fx.stop();
+        });
+        container.down('a.rewind').observe('click', function(event) {
+          event.stop();
+          fx.rewind();
+          container.down('span.console').update(0);
+        });
+        container.down('label.reverse input').observe('click', function() {
+          fx.reverse();
+        });
+      }
     });
     </script>
-
   </body>
 </html>
