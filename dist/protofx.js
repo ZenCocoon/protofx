@@ -565,7 +565,7 @@ FX.Element = Class.create(FX.Base, (function() {
     }, this);
     this.element.setStyle(style);
   }
-    
+  
   // PRIVATE FUNCTIONS
   // Parse all attributes and create FX.attribute for each
   function prepareAttributes(attributes, element) {
@@ -665,7 +665,6 @@ Element.addMethods({
       .setCycle('backAndForth', 1)
       // TODO: Should support +=XXXpx, suffix doesn't seem to be supported yet
       .animate({left: '+='+distance});
-      
     var move_left = new FX.Element(element)
       .setOptions(options)
       .setCycle('backAndForth', 1)
