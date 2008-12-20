@@ -180,6 +180,7 @@ FX.Base = Class.create((function() {
         if (this.cycle.type == 'loop') {
           this.cycle.current += this.cycle.direction;
           this.fire('cycleEnded');
+          if (!this.cycle.back) this.startAnimation(this.backward);
           this.updateAnimation(this.backward ? 1 : 0);
           this.currentTime = this.backward ? this.getDuration() : 0;
         }
