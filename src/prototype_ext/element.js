@@ -68,29 +68,25 @@ Element.addMethods({
     if (!element.visible()) return element;
     options = Object.extend({duration: 50}, options || {});
 
-    if (element.fx) element.fx_shake.stop().reverse().rewind();
+    if (element.fx_shake) element.fx_shake.stop().reverse().rewind();
 
     var distance = options.distance || 20;
     
-    var move_right = new FX.Element(element)
+    var fx1 = new FX.Element(element)
       .setOptions(options)
-      .setCycle('backAndForth', 1)
-      // TODO: Should support +=XXXpx, suffix doesn't seem to be supported yet
       .animate({left: '+='+distance});
-    var move_left = new FX.Element(element)
+    var fx2 = new FX.Element(element)
       .setOptions(options)
-      .setCycle('backAndForth', 1)
-      // TODO: Should support +=XXXpx, suffix doesn't seem to be supported yet
-      .animate({left: '-='+distance});
+      .animate({left: '-='+distance*2});
+    var fx3 = new FX.Element(element)
+      .setOptions(options)
+      .animate({left: '+='+distance});
     element.makePositioned();
     element.fx_shake = new FX.Score(element)
-      // TODO: Doesn't loop
-      .setCycle('loop', 2)
       .onEnded(function() {element.undoPositioned(); delete element.fx_shake;})
-      // TODO: Does makes backAndForth cycle as expected
-      .add(move_right)
-      // TODO: Does makes backAndForth cycle as expected
-      .add(move_left, {position: 'last'})
+      .add(fx1)
+      .add(fx2, {position: 'last'})
+      .add(fx3, {position: 'last'})
       .play();
     return element;
   },
