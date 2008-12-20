@@ -82,7 +82,7 @@ FX.Base = Class.create((function() {
   function setCycle(type, count, back) {
     back = type == 'backAndForth' ?
       ((back === false || back == 'false') ? false : true) :
-      ((back === true  || back == 'true' ) ? true  : false);
+      ((back == undefined || back === true  || back == 'true' ) ? true  : false);
     this.cycle = type == 'none' ? false : {type: type, count: count || 1, back: back, current: 0, direction: 1};
     return this;
   }
