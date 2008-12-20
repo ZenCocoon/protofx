@@ -53,7 +53,7 @@ new Test.Unit.Runner({
     new FX.Element('div')
       .setOptions({duration: this.duration})
       .animate({width: '+=100'})
-      .setCycle('loop', nb_loop)
+      .setCycle('loop', nb_loop, false)
       .onBeforeStarted(Tests.beforeStarted.bind(this))
       .onStarted(Tests.started.bind(this))
       .onCycleEnded(Tests.cycleEnded.bind(this))
