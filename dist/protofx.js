@@ -303,8 +303,7 @@ FX.Base = Class.create((function() {
   }
 
   /** 
-   *  FX.Attribute#isColor() -> true/false
-   *  Returns true if this attribute represents a Color (rgb value), else returns false
+   *  FX.Attribute#reset()
    **/
   function reset(from, backward) {
     if (from && this.relative)
@@ -635,10 +634,10 @@ Element.addMethods({
   highlight: function(element, options) {
     if (!(element = $(element))) return;
     if (!element.visible()) return element;
-    options = options || {};
 
     if (element.fx_highlight) element.fx_highlight.stop().reverse().rewind();
 
+    options = options || {};
     var highlightColor = options.highlightColor || "#ffff99";
     var originalColor = element.getStyle('background-color');
         
@@ -654,32 +653,32 @@ Element.addMethods({
   shake: function(element, options){
     if (!(element = $(element))) return;
     if (!element.visible()) return element;
-    options = Object.extend({duration: 50}, options || {});
 
-    if (element.fx) element.fx_shake.stop().reverse().rewind();
+    if (element.fx_shake) element.fx_shake.stop().reverse().rewind();
 
+    var options = Object.extend({duration: 50}, options || {})
     var distance = options.distance || 20;
+    var half_speed_options = Object.clone(options);
+    half_speed_options.duration *= 2;
     
-    var move_right = new FX.Element(element)
-      .setOptions(options)
-      .setCycle('backAndForth', 1)
-      // TODO: Should support +=XXXpx, suffix doesn't seem to be supported yet
-      .animate({left: '+='+distance});
-    var move_left = new FX.Element(element)
-      .setOptions(options)
-      .setCycle('backAndForth', 1)
-      // TODO: Should support +=XXXpx, suffix doesn't seem to be supported yet
-      .animate({left: '-='+distance});
     element.makePositioned();
-    element.fx_shake = new FX.Score(element)
-      // TODO: Doesn't loop
-      .setCycle('loop', 2)
-      .onEnded(function() {element.undoPositioned(); delete element.fx_shake;})
-      // TODO: Does makes backAndForth cycle as expected
-      .add(move_right)
-      // TODO: Does makes backAndForth cycle as expected
-      .add(move_left, {position: 'last'})
-      .play();
+    element.fx_shake = new FX.Element(element)
+      .setOptions(options)
+      .animate({left: '+='+distance})
+      .onEnded(function() {
+        new FX.Element(element)
+          .setOptions(half_speed_options)
+          .animate({left: '-='+distance*2})
+          .onEnded(function() {
+            new FX.Element(element)
+              .setOptions(options)
+              .animate({left: '+='+distance})
+              .onEnded(function() {
+                element.undoPositioned(); delete element.fx_shake;
+              }).play();
+          })
+          .play();
+      }).play();
     return element;
   },
   

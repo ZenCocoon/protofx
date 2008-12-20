@@ -47,10 +47,10 @@ Element.addMethods({
   highlight: function(element, options) {
     if (!(element = $(element))) return;
     if (!element.visible()) return element;
-    options = options || {};
 
     if (element.fx_highlight) element.fx_highlight.stop().reverse().rewind();
 
+    options = options || {};
     var highlightColor = options.highlightColor || "#ffff99";
     var originalColor = element.getStyle('background-color');
         
@@ -66,28 +66,32 @@ Element.addMethods({
   shake: function(element, options){
     if (!(element = $(element))) return;
     if (!element.visible()) return element;
-    options = Object.extend({duration: 50}, options || {});
 
     if (element.fx_shake) element.fx_shake.stop().reverse().rewind();
 
+    var options = Object.extend({duration: 50}, options || {})
     var distance = options.distance || 20;
+    var half_speed_options = Object.clone(options);
+    half_speed_options.duration *= 2;
     
-    var fx1 = new FX.Element(element)
-      .setOptions(options)
-      .animate({left: '+='+distance});
-    var fx2 = new FX.Element(element)
-      .setOptions(options)
-      .animate({left: '-='+distance*2});
-    var fx3 = new FX.Element(element)
-      .setOptions(options)
-      .animate({left: '+='+distance});
     element.makePositioned();
-    element.fx_shake = new FX.Score(element)
-      .onEnded(function() {element.undoPositioned(); delete element.fx_shake;})
-      .add(fx1)
-      .add(fx2, {position: 'last'})
-      .add(fx3, {position: 'last'})
-      .play();
+    element.fx_shake = new FX.Element(element)
+      .setOptions(options)
+      .animate({left: '+='+distance})
+      .onEnded(function() {
+        new FX.Element(element)
+          .setOptions(half_speed_options)
+          .animate({left: '-='+distance*2})
+          .onEnded(function() {
+            new FX.Element(element)
+              .setOptions(options)
+              .animate({left: '+='+distance})
+              .onEnded(function() {
+                element.undoPositioned(); delete element.fx_shake;
+              }).play();
+          })
+          .play();
+      }).play();
     return element;
   },
   
