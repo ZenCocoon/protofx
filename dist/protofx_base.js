@@ -74,7 +74,7 @@ FX.Base = Class.create((function() {
   /** 
    *  FX.Base#setCycle(type, count) -> FX.Base
    *  - type (String): 
-   *    - 'loop' restarts from begin when effect is done
+   *    - 'loop' repeat the effect
    *    - 'backAndForth' starts in reverse mode when effect is done
    *    - 'none' no cycles
    *  - count (Number or "unlimited"): number of cycles to run (default 1)
@@ -158,7 +158,7 @@ FX.Base = Class.create((function() {
     // Stop before rewinding
     this.stop();
     this.fire('rewinded');
-    this.updateAnimation(this.backward ? 1 : 0);
+    this.updateAnimation((this.cycle == false || this.cycle.type == 'none') ? (this.backward ? 1 : 0) : (this.cycle.direction < 0 ? 1 : 0));
     this.currentTime = null;
     if (this.cycle) this.cycle.current = 1;
     return this;
