@@ -73,7 +73,7 @@ FX.Base = Class.create((function() {
   /** 
    *  FX.Base#setCycle(type, count) -> FX.Base
    *  - type (String): 
-   *    - 'loop' restarts from begin when effect is done
+   *    - 'loop' repeat the effect
    *    - 'backAndForth' starts in reverse mode when effect is done
    *    - 'none' no cycles
    *  - count (Number or "unlimited"): number of cycles to run (default 1)
