@@ -23,7 +23,7 @@ FX.Element = Class.create(FX.Base, (function() {
     fx.callbacks = this.callbacks;
     return fx;
   }
-    
+  
   // FX.Score callbacks
   function startAnimation(backward) {
     this.attributes = this.attributes || prepareAttributes(this.originalAttributes, this.element);

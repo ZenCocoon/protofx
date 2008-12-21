@@ -157,10 +157,16 @@ FX.Base = Class.create((function() {
   function rewind() {
     // Stop before rewinding
     this.stop();
-    this.fire('rewinded');
-    this.updateAnimation((this.cycle == false || this.cycle.type == 'none') ? (this.backward ? 1 : 0) : (this.cycle.direction < 0 ? 1 : 0));
+    if (this.cycle == false || this.cycle.type == 'none') {
+      this.updateAnimation(this.backward ? 1 : 0);
+    } else if (this.cycle.type == 'loop' && this.cycle.back == false) {
+      this.updateAnimation(this.cycle.direction < 0 ? this.cycle.count : -1 * this.cycle.current);
+    } else {
+      this.updateAnimation(this.cycle.direction < 0 ? 1 : 0);
+    }
     this.currentTime = null;
-    if (this.cycle) this.cycle.current = 1;
+    if (this.cycle) this.cycle.current = (this.cycle.type == 'loop' && this.cycle.back == false) ? 0 : 1;
+    this.fire('rewinded');
     return this;
   }
 
@@ -180,8 +186,7 @@ FX.Base = Class.create((function() {
         if (this.cycle.type == 'loop') {
           this.cycle.current += this.cycle.direction;
           this.fire('cycleEnded');
-          if (!this.cycle.back) this.startAnimation(this.backward);
-          this.updateAnimation(this.backward ? 1 : 0);
+          this.cycle.back ? this.updateAnimation(this.backward ? 1 : 0) : this.startAnimation(this.backward);
           this.currentTime = this.backward ? this.getDuration() : 0;
         }
         else if (this.cycle.type == 'backAndForth') {
@@ -549,7 +554,7 @@ FX.Element = Class.create(FX.Base, (function() {
     fx.callbacks = this.callbacks;
     return fx;
   }
-    
+  
   // FX.Score callbacks
   function startAnimation(backward) {
     this.attributes = this.attributes || prepareAttributes(this.originalAttributes, this.element);
