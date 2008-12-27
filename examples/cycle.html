@@ -61,6 +61,7 @@
           .setOptions(Object.extend({duration:1000, transition: FX.Transition.easeInQuad}, options || {}))
           .animate({height: '+=100'})
           .setCycle(type, count, back)
+          .onRewinded(function(fx) {container.down('span.console').update(fx.getCycle());})
           .onCycleEnded(function(fx) {container.down('span.console').update(fx.getCycle());});
 
         container.down('a.play').observe('click', function(event) {
@@ -74,7 +75,6 @@
         container.down('a.rewind').observe('click', function(event) {
           event.stop();
           fx.rewind();
-          container.down('span.console').update(0);
         });
         container.down('label.reverse input').observe('click', function() {
           fx.reverse();

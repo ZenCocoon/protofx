@@ -38,7 +38,8 @@ FX.Base = Class.create((function() {
     this.backward    = false;
     this.cycle       = false;
     this.callbacks   = {onEnded: Prototype.emptyFunction, onStarted: Prototype.emptyFunction,
-                        onBeforeStarted: Prototype.emptyFunction, onCycleEnded: Prototype.emptyFunction};
+                        onBeforeStarted: Prototype.emptyFunction, onCycleEnded: Prototype.emptyFunction,
+                        onRewinded: Prototype.emptyFunction};
     this.setOptions(options);
   }
   
@@ -94,7 +95,7 @@ FX.Base = Class.create((function() {
    *  Returns current cycle position
    **/
   function getCycle() {
-    return this.cycle ? this.cycle.current : 1
+    return this.cycle ? this.cycle.current : (this.backward ? 1 : 0)
   }
   
   /** 
@@ -157,15 +158,13 @@ FX.Base = Class.create((function() {
   function rewind() {
     // Stop before rewinding
     this.stop();
-    if (this.cycle == false || this.cycle.type == 'none') {
-      this.updateAnimation(this.backward ? 1 : 0);
-    } else if (this.cycle.type == 'loop' && this.cycle.back == false) {
+    if (this.cycle.type == 'loop' && this.cycle.back == false) {
       this.updateAnimation(this.cycle.direction < 0 ? this.cycle.count : -1 * this.cycle.current);
     } else {
-      this.updateAnimation(this.cycle.direction < 0 ? 1 : 0);
+      this.updateAnimation(this.backward ? 1 : 0);
     }
     this.currentTime = null;
-    if (this.cycle) this.cycle.current = (this.cycle.type == 'loop' && this.cycle.back == false) ? 0 : 1;
+    if (this.cycle) this.cycle.current = this.backward ? this.cycle.count : 0;
     this.fire('rewinded');
     return this;
   }
@@ -173,7 +172,7 @@ FX.Base = Class.create((function() {
   // Function called periodically by Metronome
   function metronomeUpdate(delta) {
     // Update current time
-    this.currentTime += this.backward ? -delta : delta;
+    this.currentTime += this.backward || this.cycle.direction < 0 ? -delta : delta;
 
     // Unregister from FX.Metronome if time is out of range
     if (this.currentTime > this.getDuration() || this.currentTime < 0) {
@@ -190,9 +189,9 @@ FX.Base = Class.create((function() {
           this.currentTime = this.backward ? this.getDuration() : 0;
         }
         else if (this.cycle.type == 'backAndForth') {
-          this.backward = !this.backward;
+          this.cycle.direction *= -1;
           if ((this.backward != this.cycle.back && this.cycle.direction > 0) || (this.backward == this.cycle.back && this.cycle.direction < 0)) {
-            this.cycle.current += this.cycle.direction;
+            this.cycle.current += this.backward ? -1 : 1;
             this.fire('cycleEnded');
           }
         }
@@ -232,6 +231,11 @@ FX.Base = Class.create((function() {
     return this;
   }
   
+  function onRewinded(callback) {
+    this.callbacks.onRewinded = callback;
+    return this;
+  }
+  
   function fire(eventName) {
     var callback;
     if (callback = this.callbacks['on'+ eventName.capitalize()]) callback(this);
@@ -264,7 +268,8 @@ FX.Base = Class.create((function() {
     onStarted:       onStarted,
     onEnded:         onEnded,
     onBeforeStarted: onBeforeStarted,
-    onCycleEnded:    onCycleEnded
+    onCycleEnded:    onCycleEnded,
+    onRewinded:      onRewinded
   }
 })());
 
