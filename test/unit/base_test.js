@@ -9,9 +9,9 @@ new Test.Unit.Runner({
     this.extra_wait = 100;
   },
   
-  teardown: function() {
-    $('div').remove();
-  },
+  // teardown: function() {
+  //   $('div').remove();
+  // },
   
   testEvents: function() {
     var width = $('div').setStyle({width: '100px'}).getWidth();
@@ -205,47 +205,62 @@ new Test.Unit.Runner({
       .animate({height: '+=100'})
       .play();
 
-    document.observe('fx:rewinded', function(event) {
-      var fx = event.memo.fx;
-      if (fx.isBackward() == 1) {
-        this.assertEqual(200, $('div').getHeight(), 'Should go to final height');
-        this.assertEqual(1, fx.getCycle(), 'Cycle count should be to the maximum');
-      }
-    }.bind(this));
-
     // Wait half of the animation to test rewind
     this.wait(this.duration / 2, function() {
       fx.reverse().rewind();
+      this.assertEqual(200, $('div').getHeight(), 'Should go to final height');
+      this.assertEqual(1, fx.getCycle(), 'Cycle count should be to the maximum');
+      this.assertEqual(1, fx.isBackward(), 'Should go backward');
 
       // Test with backAndForth cycle
-      fx.setCycle('backAndForth', 1).reverse().rewind().play();
+      fx.reverse().rewind().setCycle('backAndForth', 1).play();
       // Wait a quarter of the animation to test rewind
       this.wait(this.duration / 2, function() {
         fx.reverse().rewind();
-
+        this.assertEqual(100, $('div').getHeight(), 'Should go to final height');
+        this.assertEqual(1, fx.getCycle(), 'Cycle count should be to the maximum');
+        this.assertEqual(1, fx.isBackward(), 'Should go backward');
+        
         // Test to rewind while backAndForth cycle moves backward
-        fx.setCycle('backAndForth', 1).reverse().rewind().play();
+        fx.reverse().rewind().setCycle('backAndForth', 1).play();
         // Wait 3 quarters of the animation to test rewind
         this.wait(this.duration * 1.5, function() {
           fx.reverse().rewind();
+          this.assertEqual(100, $('div').getHeight(), 'Should go to final height');
+          this.assertEqual(1, fx.getCycle(), 'Cycle count should be to the maximum');
+          this.assertEqual(1, fx.isBackward(), 'Should go backward');
 
-          // Make sure it get back to origin even from finished state
-          fx.setCycle('backAndForth', 1, false).reverse().rewind().play();
+          // Make sure it goes to final state even if already finished
+          fx.reverse().rewind().setCycle('backAndForth', 1, false).play();
           // Wait that the animation has finished before testing rewind
           this.wait(this.duration * 2 + this.extra_wait, function() {
             fx.reverse().rewind();
+            this.assertEqual(200, $('div').getHeight(), 'Should go to final height');
+            this.assertEqual(1, fx.getCycle(), 'Cycle count should be to the maximum');
+            this.assertEqual(1, fx.isBackward(), 'Should go backward');
 
             // Make sure it get back to origin even from finished state
-            fx.setCycle('loop', 1, true).reverse().rewind().play();
+            fx.reverse().rewind().setCycle('loop', 2, true).play();
             // Wait that the animation has finished before testing rewind
             this.wait(this.duration * 2 + this.extra_wait, function() {
               fx.reverse().rewind();
+              this.assertEqual(100, $('div').getHeight(), 'Should go to final height');
+              this.assertEqual(2, fx.getCycle(), 'Cycle count should be to the maximum');
+              this.assertEqual(1, fx.isBackward(), 'Should go backward');
 
-              // Make sure it get back to origin even from finished state
-              fx.setCycle('loop', 1).reverse().rewind().play();
+              // Make sure it goes to final state even if already finished
+              fx.reverse().rewind().setCycle('loop', 2, false);
+              this.assertEqual(100, $('div').getHeight(), 'Should go to final height');
+              this.assertEqual(0, fx.getCycle(), 'Cycle count should be to the maximum');
+              this.assertEqual(0, fx.isBackward(), "Shouldn't go backward");
+              fx.play();
               // Wait that the animation has finished before testing rewind
               this.wait(this.duration * 2 + this.extra_wait, function() {
+                this.assertEqual(300, $('div').getHeight(), 'Should go to final height');
+                this.assertEqual(2, fx.getCycle(), 'Cycle count should be to the maximum');
                 fx.reverse().rewind();
+                this.assertEqual(300, $('div').getHeight(), 'Should go to final height');
+                this.assertEqual(2, fx.getCycle(), 'Cycle count should be to the maximum');
               });
             });
           });

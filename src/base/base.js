@@ -157,8 +157,12 @@ FX.Base = Class.create((function() {
   function rewind() {
     // Stop before rewinding
     this.stop();
-    if (this.cycle.type == 'loop' && this.cycle.back == false) {
-      this.updateAnimation(this.cycle.direction < 0 ? this.cycle.count : -1 * this.cycle.current);
+    if (!this.cycle) {
+      this.updateAnimation(this.backward ? 1 : 0);
+    } else if (this.cycle.back == true) {
+      this.updateAnimation(0);
+    } else if (this.cycle.type == 'loop') {
+      this.updateAnimation(this.backward ? parseInt(this.cycle.count) - this.cycle.current : -1 * this.cycle.current);
     } else {
       this.updateAnimation(this.backward ? 1 : 0);
     }
