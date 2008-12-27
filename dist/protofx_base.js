@@ -164,7 +164,7 @@ FX.Base = Class.create((function() {
       this.updateAnimation(this.backward ? 1 : 0);
     }
     this.currentTime = null;
-    if (this.cycle) this.cycle.current = this.backward ? this.cycle.count : 0;
+    if (this.cycle) this.cycle.current = this.backward ? parseInt(this.cycle.count) : 0;
     this.fire('rewinded');
     return this;
   }
