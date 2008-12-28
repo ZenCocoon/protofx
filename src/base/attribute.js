@@ -16,7 +16,7 @@
     this.from   = from;
     this.to     = to;
     this.type   = computeType(this.from);
-    this.unit   = computeUnit(this.from);
+    this.unit   = computeUnit(this.from === 0 || (Object.isString(this.from) && (this.from.match(/0[\w\%]*/))) ? this.to : this.from);
     this.fromFX = computeFromFX(this.from, this.isColor());
     this.toFX   = computeToFX(this);
   }
@@ -27,7 +27,7 @@
    *  returns: converted value. A Number or a String for a Color (rgb(R,G,B))
    **/
   function convert(pos) {
-    if (this.isNumber()) 
+    if (this.isNumber())
       return convertValue(this.fromFX, this.toFX, pos) + this.unit;
     // Else it's a color
     else {
@@ -78,9 +78,9 @@
       return 'Number'
   }
   
-  function computeUnit(from) {
+  function computeUnit(value) {
     var match;
-    if (Object.isString(from) && (match = from.match(/(\d+)([\w\%]*)/)))
+    if (Object.isString(value) && (match = value.match(/(\d+)([\w\%]*)/)))
       return match[2];
     else
       return '';
