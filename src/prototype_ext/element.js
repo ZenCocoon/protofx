@@ -21,10 +21,10 @@ Element.addMethods({
     if (!(element = $(element))) return;
     if (!element.visible() || element.fx_blindUp) return element;
     
-    element.fx_blindUp = new FX.Element(element)
+    var wrapper = element.wrap().makeClipping().setStyle({height: element.getHeight()+'px'});
+    element.fx_blindUp = new FX.Element(wrapper)
       .setOptions(options || {})
-      .onBeforeStarted(function() {element.originalHeight = element.style.height})
-      .onEnded(function() {element.hide(); element.style.height = element.originalHeight; delete element.fx_blindUp;})
+      .onEnded(function() {element.hide(); wrapper.replace(element); delete element.fx_blindUp;})
       .animate({height: 0})
       .play();
     return element;
@@ -86,9 +86,7 @@ Element.addMethods({
             new FX.Element(element)
               .setOptions(options)
               .animate({left: '+='+distance})
-              .onEnded(function() {
-                element.undoPositioned(); delete element.fx_shake;
-              }).play();
+              .onEnded(function() {element.undoPositioned(); delete element.fx_shake;}).play();
           })
           .play();
       }).play();

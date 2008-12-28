@@ -64,8 +64,8 @@ new Test.Unit.Runner({
     
       element.show().blindUp({duration: 1000});
       this.wait(550, function(){
-        this.assertNotEqual(200, element.getHeight());
-        this.assertNotEqual(0, element.getHeight());
+        this.assertNotEqual(200, element.up().getHeight());
+        this.assertNotEqual(0, element.up().getHeight());
         this.wait(500, function(){
           this.assertEqual(200, element.getHeight(), 'Should end with initial height');
           this.assertNotVisible(element, 'Should end hidden');
