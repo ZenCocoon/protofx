@@ -91,8 +91,8 @@ new Test.Unit.Runner({
       element.blindDown({duration: 1000});
       this.wait(550, function(){
         this.assertVisible(element);
-        this.assertNotEqual(200, element.getHeight());
-        this.assertNotEqual(0, element.getHeight());
+        this.assertNotEqual(200, element.up().getHeight());
+        this.assertNotEqual(0, element.up().getHeight());
         this.wait(500, function(){
           this.assertEqual(200, element.getHeight());
         });
