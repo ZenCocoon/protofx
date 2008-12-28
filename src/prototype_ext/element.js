@@ -33,13 +33,15 @@ Element.addMethods({
   blindDown: function(element, options) {
     if (!(element = $(element))) return;
     if (element.visible() || element.fx_blindDown) return element;
-    var height = element.getHeight();
 
-    element.fx_blindDown = new FX.Element(element)
+    var wrapper = element.wrap().makeClipping();
+    element.show();
+    var height = wrapper.getHeight();
+    wrapper.setStyle({height: 0}); 
+    element.fx_blindDown = new FX.Element(wrapper)
       .setOptions(options || {})
-      .onBeforeStarted(function() {element.show(); element.style.height = '0px';})
-      .onEnded(function() {delete element.fx_blindDown})
-      .animate({height: height + 'px'})
+      .onEnded(function() {wrapper.replace(element); delete element.fx_blindDown})
+      .animate({height: height+'px'})
       .play();
     return element;
   },

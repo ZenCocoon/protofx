@@ -295,7 +295,7 @@ FX.Base = Class.create((function() {
     this.from   = from;
     this.to     = to;
     this.type   = computeType(this.from);
-    this.unit   = computeUnit(this.from);
+    this.unit   = computeUnit(this.from === 0 || (Object.isString(this.from) && (this.from.match(/0[\w\%]*/))) ? this.to : this.from);
     this.fromFX = computeFromFX(this.from, this.isColor());
     this.toFX   = computeToFX(this);
   }
@@ -306,7 +306,7 @@ FX.Base = Class.create((function() {
    *  returns: converted value. A Number or a String for a Color (rgb(R,G,B))
    **/
   function convert(pos) {
-    if (this.isNumber()) 
+    if (this.isNumber())
       return convertValue(this.fromFX, this.toFX, pos) + this.unit;
     // Else it's a color
     else {
@@ -357,9 +357,9 @@ FX.Base = Class.create((function() {
       return 'Number'
   }
   
-  function computeUnit(from) {
+  function computeUnit(value) {
     var match;
-    if (Object.isString(from) && (match = from.match(/(\d+)([\w\%]*)/)))
+    if (Object.isString(value) && (match = value.match(/(\d+)([\w\%]*)/)))
       return match[2];
     else
       return '';
@@ -635,13 +635,15 @@ Element.addMethods({
   blindDown: function(element, options) {
     if (!(element = $(element))) return;
     if (element.visible() || element.fx_blindDown) return element;
-    var height = element.getHeight();
 
-    element.fx_blindDown = new FX.Element(element)
+    var wrapper = element.wrap().makeClipping();
+    element.show();
+    var height = wrapper.getHeight();
+    wrapper.setStyle({height: 0}); 
+    element.fx_blindDown = new FX.Element(wrapper)
       .setOptions(options || {})
-      .onBeforeStarted(function() {element.show(); element.style.height = '0px';})
-      .onEnded(function() {delete element.fx_blindDown})
-      .animate({height: height + 'px'})
+      .onEnded(function() {wrapper.replace(element); delete element.fx_blindDown})
+      .animate({height: height+'px'})
       .play();
     return element;
   },
