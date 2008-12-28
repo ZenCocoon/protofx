@@ -16,7 +16,7 @@
     this.from   = from;
     this.to     = to;
     this.type   = computeType(this.from);
-    this.unit   = computeUnit(this.from === 0 || (Object.isString(this.from) && (this.from.match(/0[\w\%]*/))) ? this.to : this.from);
+    this.unit   = computeUnit(this.from, this.to);
     this.fromFX = computeFromFX(this.from, this.isColor());
     this.toFX   = computeToFX(this);
   }
@@ -78,11 +78,17 @@
       return 'Number'
   }
   
-  function computeUnit(value) {
-    var match;
-    if (Object.isString(value) && (match = value.match(/(\d+)([\w\%]*)/)))
-      return match[2];
-    else
+  function computeUnit(from, to) {
+    var match_from, match_to;
+    if (Object.isString(from)) {
+      match_from = from.match(/(\d+)([\w\%]*)/);
+      if (Object.isString(to))
+        match_to = to.match(/(\d+)([\w\%]*)/);
+      if (match_to !== undefined && match_from[1] == '0' && match_to[2] != '')
+        return match_to[2];
+      else
+        return match_from[2];
+    } else
       return '';
   }
   
@@ -120,7 +126,6 @@
   function _computeOperator(attribute, backward) {
     attribute.relative = true;
     var match = isOperator(attribute.to);
-
     if ((backward && match[1] == '-=') || (!backward && match[1] == '+='))
       return attribute.fromFX + parseFloat(match[2]);
     else if ((backward && match[1] == '+=') || (!backward && match[1] == '-='))
