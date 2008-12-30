@@ -9,9 +9,9 @@ new Test.Unit.Runner({
     this.extra_wait = 100;
   },
   
-  // teardown: function() {
-  //   $('div').remove();
-  // },
+  teardown: function() {
+    $('div').remove();
+  },
   
   testEvents: function() {
     var width = $('div').setStyle({width: '100px'}).getWidth();
@@ -33,6 +33,10 @@ new Test.Unit.Runner({
       rewinded: function(fx, test_runner) {
         test_runner = test_runner || this;
         test_runner.assertEqual(width, $('div').getWidth(), "rewinded should be called once the rewind action is triggered");
+      },
+      reversed: function(fx, test_runner) {
+        test_runner = test_runner || this;
+        test_runner.assertEqual(true, fx.isBackward());
       },
       ended: function(fx, test_runner) {
         test_runner = test_runner || this;
@@ -56,6 +60,10 @@ new Test.Unit.Runner({
       Tests.rewinded(event.memo.fx, this);
     }.bind(this));
     
+    document.observe('fx:reversed', function(event) {
+      Tests.reversed(event.memo.fx, this);
+    }.bind(this));
+    
     document.observe('fx:ended', function(event) {
       Tests.ended(event.memo.fx, this);
     }.bind(this));
@@ -68,12 +76,13 @@ new Test.Unit.Runner({
       .onStarted(Tests.started.bind(this))
       .onCycleEnded(Tests.cycleEnded.bind(this))
       .onRewinded(Tests.rewinded.bind(this))
+      .onReversed(Tests.reversed.bind(this))
       .onEnded(Tests.ended.bind(this))
       .play();
 
     // Keep waiting the end of the animation + tiny extra to don't stop testing before animation has been done
     this.wait(this.duration * nb_loop + this.extra_wait, function() {
-      fx.rewind();
+      fx.rewind().reverse();
     });
   },
   

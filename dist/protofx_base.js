@@ -39,7 +39,7 @@ FX.Base = Class.create((function() {
     this.cycle       = false;
     this.callbacks   = {onEnded: Prototype.emptyFunction, onStarted: Prototype.emptyFunction,
                         onBeforeStarted: Prototype.emptyFunction, onCycleEnded: Prototype.emptyFunction,
-                        onRewinded: Prototype.emptyFunction};
+                        onRewinded: Prototype.emptyFunction, onReversed: Prototype.emptyFunction};
     this.setOptions(options);
   }
   
@@ -143,9 +143,9 @@ FX.Base = Class.create((function() {
    *  fire fx:reversed
    **/
   function reverse() {
-    this.fire('reversed');
     if (this.cycle) this.cycle.direction *= -1;
     this.backward = !this.backward;
+    this.fire('reversed');
     return this;
   }
   
@@ -240,6 +240,11 @@ FX.Base = Class.create((function() {
     return this;
   }
   
+  function onReversed(callback) {
+    this.callbacks.onReversed = callback;
+    return this;
+  }
+  
   function fire(eventName) {
     var callback;
     if (callback = this.callbacks['on'+ eventName.capitalize()]) callback(this);
@@ -273,7 +278,8 @@ FX.Base = Class.create((function() {
     onEnded:         onEnded,
     onBeforeStarted: onBeforeStarted,
     onCycleEnded:    onCycleEnded,
-    onRewinded:      onRewinded
+    onRewinded:      onRewinded,
+    onReversed:      onReversed 
   }
 })());
 
