@@ -61,6 +61,7 @@
           .setOptions(Object.extend({duration:1000, transition: FX.Transition.easeInQuad}, options || {}))
           .animate({height: '+=100'})
           .setCycle(type, count, back)
+          .onStarted(function(fx) {container.down('span.console').update(fx.getCycle());})
           .onRewinded(function(fx) {container.down('span.console').update(fx.getCycle());})
           .onCycleEnded(function(fx) {container.down('span.console').update(fx.getCycle());});
 

@@ -111,10 +111,16 @@ FX.Base = Class.create((function() {
 
     // Reset time for a new play
     if (this.currentTime == null) {
-      this.currentTime = this.backward ? this.getDuration() : 0;
-      this.startAnimation(this.backward);
+      if (this.backward && this.cycle) {
+        this.cycle.direction = this.cycle.back ? 1 : -1;
+        this.cycle.current = this.cycle.count == 'unlimited' ? 0 : parseInt(this.cycle.count);
+        this.currentTime = this.backward && !this.cycle.back ? this.getDuration() : 0;
+        this.startAnimation(this.back);
+      } else {
+        this.currentTime = this.backward ? this.getDuration() : 0;
+        this.startAnimation(this.backward);
+      }
     }
-
     // Add it to metronome to receive recurring updateAnimation
     FX.Metronome.register(this);
 
@@ -175,31 +181,40 @@ FX.Base = Class.create((function() {
   // Function called periodically by Metronome
   function metronomeUpdate(delta) {
     // Update current time
-    this.currentTime += this.backward || this.cycle.direction < 0 ? -delta : delta;
+    if (this.cycle) {
+      this.currentTime += this.cycle.direction < 0 ? -delta : delta;
+    } else {
+      this.currentTime += this.backward ? -delta : delta;
+    }
 
     // Unregister from FX.Metronome if time is out of range
     if (this.currentTime > this.getDuration() || this.currentTime < 0) {
       // Force update to last position
       this.currentTime = this.currentTime < 0 ? 0 : this.getDuration();
       this.updateAnimation(this.currentTime / this.getDuration());
-
+      
       // Check cycle
       if (this.cycle) {
         if (this.cycle.type == 'loop') {
-          this.cycle.current += this.cycle.direction;
+          this.cycle.current += this.backward ? -1 : this.cycle.direction;
           this.fire('cycleEnded');
-          this.cycle.back ? this.updateAnimation(this.backward ? 1 : 0) : this.startAnimation(this.backward);
-          this.currentTime = this.backward ? this.getDuration() : 0;
+          this.cycle.back ? this.updateAnimation(0) : this.startAnimation(this.backward);
+          this.currentTime = this.backward && !this.cycle.back ? this.getDuration() : 0;
         }
         else if (this.cycle.type == 'backAndForth') {
           this.cycle.direction *= -1;
-          if ((this.backward != this.cycle.back && this.cycle.direction > 0) || (this.backward == this.cycle.back && this.cycle.direction < 0)) {
+          if ((!this.backward && this.cycle.back && this.cycle.direction > 0) ||
+              (!this.backward && !this.cycle.back && this.cycle.direction < 0) ||
+              (this.backward && this.cycle.back && this.cycle.direction > 0) ||
+              (this.backward && !this.cycle.back && this.cycle.direction < 0)) {
             this.cycle.current += this.backward ? -1 : 1;
             this.fire('cycleEnded');
           }
         }
         // Still cycle to run
-        if (this.cycle.count == 'unlimited' || (0 <= this.cycle.current && this.cycle.current < this.cycle.count)) return;
+        if (this.cycle.count == 'unlimited' ||
+            (!this.backward && 0 <= this.cycle.current && this.cycle.current < this.cycle.count) ||
+            (this.backward && this.cycle.current > 0 || (this.cycle.type == "backAndForth" && this.cycle.current == 0 && this.cycle.direction < 0))) return;
       }
       this.stopAnimation();
       FX.Metronome.unregister(this);
@@ -209,7 +224,8 @@ FX.Base = Class.create((function() {
       this.fire('ended');
     }
     else {
-      var pos = this.options.transition(this.currentTime / this.getDuration(), this.currentTime, 0, 1, this.getDuration());
+      var from_pos = this.cycle && this.backward && this.cycle.type == 'loop' && !this.cycle.back ? this.cycle.count - 1 : 0;
+      var pos = this.options.transition(this.currentTime / this.getDuration(), this.currentTime, from_pos, 1, this.getDuration());
       this.updateAnimation(pos);
     }
   }
